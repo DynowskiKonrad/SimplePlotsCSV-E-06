@@ -16,7 +16,7 @@ def getting_data_to_tuple(name_of_file):
 
 
 def getting_polynomial_regression_coefficients(X, Y):
-    return np.polyfit(X, Y, 10)
+    return np.polyfit(X, Y, 17)
 
 
 def creating_linspace_over_X(X):
@@ -28,14 +28,22 @@ def plotter(XY, nameoffig):
     Y = XY[:][1]
     c = getting_polynomial_regression_coefficients(X, Y) #coefficient tuple
     x = creating_linspace_over_X(X)
-    plt.plot(x, c[0]*x**10 + c[1]*x**9 + c[2] * x**8 + c[3] * x**7 + c[4] * x ** 6 + c[5] * x ** 5 +
-             c[6] * x ** 4 + c[7] * x ** 3 + c[8] * x ** 2 + c[9] * x + c[10])
+    plt.plot(x, np.polyval(c, x))
+    c_bandwith = c
+    c_bandwith[-1] = c_bandwith[-1] - max(Y) / np.sqrt(2)
+    roots = np.roots(c_bandwith)
+    rootsreal = [root for root in roots if np.iscomplex(root) == False and root < max(X) and root > min(X)]
+    bandwith = abs(rootsreal[1] - rootsreal[0])
+    print("Bandswidth is {0} kHz".format(bandwith.round(2)))
     plt.xlabel("Frequency [$kHz$]")
     plt.ylabel("Current [$mA$]")
     plt.tight_layout()
     plt.savefig(nameoffig)
     plt.clf()
-
+    resonancefrequency = X[Y.index(max(Y))]
+    print("The resonance frequency is {0} kHz".format(resonancefrequency))
+    qobtainedwith5thequation = resonancefrequency / bandwith
+    print("Q factor obtained with equation 5 is {0}".format(qobtainedwith5thequation.round(2)))
 
 
 plotter(getting_data_to_tuple("E-06,1.csv"), "plot1")
